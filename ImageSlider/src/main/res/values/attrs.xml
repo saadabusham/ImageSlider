@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--     ImageSlider -->
+    <declare-styleable name="ImageSlider">
+        <attr name="selected_color" format="reference" />
+        <attr name="unSelected_color" format="reference" />
+        <attr name="indicator_count" format="integer" />
+    </declare-styleable>
+
+</resources>
