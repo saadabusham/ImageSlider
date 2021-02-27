@@ -3,15 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="data"
-            type="Boolean" />
+            type="com.sedo.imageslider.indecator.Indicator" />
     </data>
+
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/imgDotImage"
-        android:layout_width="@dimen/_8sdp"
-        android:layout_height="@dimen/_8sdp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        indicator_width="@{data.width}"
+        indicator_height="@{data.height}"
         android:layout_margin="@dimen/_3sdp"
-        app:cardElevation="0dp"
-        app:cardCornerRadius="@dimen/_4sdp"/>
+        app:cardElevation="0dp" />
 </layout>

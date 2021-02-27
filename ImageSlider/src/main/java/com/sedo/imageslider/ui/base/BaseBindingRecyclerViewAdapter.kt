@@ -3,6 +3,7 @@ package com.sedo.imageslider.ui.base
 import android.content.Context
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.sedo.imageslider.util.listeners.OnItemClickListener
 
 abstract class BaseBindingRecyclerViewAdapter<MODEL>(
     protected val context: Context
@@ -56,8 +57,5 @@ abstract class BaseBindingRecyclerViewAdapter<MODEL>(
 
     override fun getItemCount(): Int = items.size
 
-    interface OnItemClickListener {
-        fun onItemClick(view: View?, position: Int, item: Any)
-        fun onItemLongClick(view: View?, position: Int, item: Any){}
-    }
+
 }

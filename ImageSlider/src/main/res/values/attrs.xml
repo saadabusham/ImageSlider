@@ -5,6 +5,8 @@
         <attr name="selected_color" format="reference" />
         <attr name="unSelected_color" format="reference" />
         <attr name="indicator_count" format="integer" />
+        <attr name="indicator_height_size" format="reference" />
+        <attr name="indicator_width_size" format="reference" />
     </declare-styleable>
 
 </resources>

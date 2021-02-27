@@ -3,16 +3,16 @@ package com.sedo.imageslider.ui
 import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
-import android.view.View
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.sedo.imageslider.R
+import com.sedo.imageslider.indecator.Indicator
 import com.sedo.imageslider.ui.adapters.ImagesRecyclerAdapter
 import com.sedo.imageslider.ui.adapters.IndicatorRecyclerAdapter
-import com.sedo.imageslider.ui.base.BaseBindingRecyclerViewAdapter
 import com.sedo.imageslider.ui.base.views.RtlViewPager
+import com.sedo.imageslider.util.listeners.OnItemClickListener
 
 class ImageSlider @JvmOverloads constructor(
     context: Context,
@@ -20,29 +20,53 @@ class ImageSlider @JvmOverloads constructor(
     private val defStyleAttr: Int = 0
 ) : RelativeLayout(context, attrs, defStyleAttr) {
 
-    lateinit var imagesAdapterRecyclerAdapter: ImagesRecyclerAdapter
-    lateinit var indecatorRecyclerViewAdapter: IndicatorRecyclerAdapter
-    lateinit var ivAttrs: TypedArray
-    var indicatorItemCount: Int = 4
-    var indicatorSelectedColor: Int = R.color.default_selected
-    var indicatorUnSelectedColor: Int = R.color.default_unselected
-    lateinit var rtlViewPager: RtlViewPager
-    lateinit var recyclerView:RecyclerView
-    var indecatorPosition = 0
+    private var imagesAdapterRecyclerAdapter: ImagesRecyclerAdapter? = null
+    private lateinit var indicatorRecyclerViewAdapter: IndicatorRecyclerAdapter
+    private lateinit var ivAttrs: TypedArray
+    private var indicatorItemCount: Int = 0
+    private var indicatorSelectedColor: Int = R.color.default_selected
+    private var indicatorUnSelectedColor: Int = R.color.default_unselected
+    private var indicatorHeightSize: Int = R.dimen._8sdp
+    private var indicatorWidthSize: Int = R.dimen._8sdp
+    private lateinit var rtlViewPager: RtlViewPager
+    private lateinit var recyclerView: RecyclerView
+    private var indicatorPosition = 0
+
+    var itemClickListener: OnItemClickListener? = null
+        set(value) {
+            imagesAdapterRecyclerAdapter?.itemClickListener = value
+            field = value
+        }
+
+    var sliderArrayListString: List<String>? = null
+        set(value) {
+            if (value != null) {
+                sliderArrayListResource = null
+                setUpImageAdapter(imagesStrings = value)
+            }
+            field = value
+        }
+    var sliderArrayListResource: List<Int>? = null
+        set(value) {
+            if (value != null) {
+                sliderArrayListString = null
+                setUpImageAdapter(imagesResource = value)
+            }
+            field = value
+        }
 
     init {
         initAttrs()
-        setUpImageAdapter(getItemsToFillViewPager())
-        setUpIndicator()
     }
 
-    private fun setUpIndicator(){
+    private fun setUpIndicator() {
         recyclerView = RecyclerView(context)
         recyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        indecatorRecyclerViewAdapter = IndicatorRecyclerAdapter(context)
-        indecatorRecyclerViewAdapter.submitItems(getItemsToFill())
-        recyclerView.adapter = indecatorRecyclerViewAdapter
+        indicatorRecyclerViewAdapter =
+            IndicatorRecyclerAdapter(context, indicatorSelectedColor, indicatorUnSelectedColor)
+        indicatorRecyclerViewAdapter.submitItems(getItemsToFill())
+        recyclerView.adapter = indicatorRecyclerViewAdapter
         val params = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
         params.addRule(ALIGN_PARENT_BOTTOM)
         params.addRule(CENTER_IN_PARENT)
@@ -52,42 +76,42 @@ class ImageSlider @JvmOverloads constructor(
             recyclerView
         )
     }
-    private fun getItemsToFill(): List<Boolean> {
-        val list = mutableListOf<Boolean>()
+
+    private fun getItemsToFill(): List<Indicator> {
+        val list = mutableListOf<Indicator>()
         for (i in 0 until indicatorItemCount) {
-            list.add(i == 0)
+            list.add(
+                Indicator(
+                    i == 0,
+                    resources.getDimension(indicatorWidthSize).toInt(),
+                    resources.getDimension(indicatorHeightSize).toInt()
+                )
+            )
         }
         return list
     }
 
-    private fun getItemsToFillViewPager(): List<String> {
-        val list = mutableListOf<String>()
-        for (i in 0 until indicatorItemCount) {
-            list.add("i == 0")
-        }
-        return list
-    }
+//    private fun getItemsToFillViewPager(): List<String> {
+//        val list = mutableListOf<String>()
+//        for (i in 0 until indicatorItemCount) {
+//            list.add("i == 0")
+//        }
+//        return list
+//    }
 
-    private fun setUpImageAdapter(images: List<String>) {
+    private fun setUpImageAdapter(
+        imagesResource: List<Int>? = null,
+        imagesStrings: List<String>? = null
+    ) {
         rtlViewPager = RtlViewPager(context)
         imagesAdapterRecyclerAdapter = ImagesRecyclerAdapter(
             context,
-            images,
-            object : BaseBindingRecyclerViewAdapter.OnItemClickListener {
-                override fun onItemClick(view: View?, position: Int, item: Any) {
-//                    if (item is Image)
-//                        view?.let {
-//                            GalleryActivity.start(
-//                                requireActivity(),
-//                                imagesAdapterRecyclerAdapter.sliderArrayList,
-//                                it,
-//                                position
-//                            )
-//                        }
-                }
-            })
-        rtlViewPager?.adapter = imagesAdapterRecyclerAdapter
-        rtlViewPager?.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            imagesResource != null,
+            imagesStrings,
+            imagesResource
+        )
+        rtlViewPager.adapter = imagesAdapterRecyclerAdapter
+        rtlViewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrolled(
                 position: Int,
                 positionOffset: Float,
@@ -111,13 +135,15 @@ class ImageSlider @JvmOverloads constructor(
                 LayoutParams.MATCH_PARENT
             )
         )
+        indicatorItemCount = imagesResource?.size ?: (imagesStrings?.size ?: 0)
+        setUpIndicator()
     }
 
     private fun updateIndicator(position: Int) {
-        indecatorRecyclerViewAdapter.items[indecatorPosition] = false
-        indecatorRecyclerViewAdapter.items[position] = true
-        indecatorRecyclerViewAdapter.notifyDataSetChanged()
-        indecatorPosition = position
+        indicatorRecyclerViewAdapter?.items[indicatorPosition].selected = false
+        indicatorRecyclerViewAdapter?.items[position].selected = true
+        indicatorRecyclerViewAdapter?.notifyDataSetChanged()
+        indicatorPosition = position
     }
 
     private fun initAttrs() {
@@ -127,7 +153,7 @@ class ImageSlider @JvmOverloads constructor(
             defStyleAttr,
             0
         )
-        indicatorItemCount = ivAttrs.getInteger(R.styleable.ImageSlider_indicator_count, 0)
+//        indicatorItemCount = ivAttrs.getInteger(R.styleable.ImageSlider_indicator_count, 0)
         indicatorSelectedColor =
             ivAttrs.getResourceId(R.styleable.ImageSlider_selected_color, R.color.default_selected)
         indicatorUnSelectedColor =
@@ -135,7 +161,16 @@ class ImageSlider @JvmOverloads constructor(
                 R.styleable.ImageSlider_unSelected_color,
                 R.color.default_unselected
             )
-
+        indicatorHeightSize =
+            ivAttrs.getResourceId(
+                R.styleable.ImageSlider_indicator_height_size,
+                R.dimen._8sdp
+            )
+        indicatorWidthSize =
+            ivAttrs.getResourceId(
+                R.styleable.ImageSlider_indicator_width_size,
+                R.dimen._8sdp
+            )
     }
 
 }

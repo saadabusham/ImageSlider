@@ -7,8 +7,12 @@
     tools:context=".MainActivity">
 
     <com.sedo.imageslider.ui.ImageSlider
+        android:id="@+id/imageSlider"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="match_parent"
         app:indicator_count="5"
-        />
+        app:selected_color="@color/black"
+        app:unSelected_color="@color/white"
+        app:indicator_height_size="@dimen/_10sdp"
+        app:indicator_width_size="@dimen/_10sdp"/>
 </RelativeLayout>

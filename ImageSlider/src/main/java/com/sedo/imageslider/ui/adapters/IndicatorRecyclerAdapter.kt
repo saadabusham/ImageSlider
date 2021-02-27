@@ -6,12 +6,15 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.sedo.imageslider.R
 import com.sedo.imageslider.databinding.RowIndecatorBinding
+import com.sedo.imageslider.indecator.Indicator
 import com.sedo.imageslider.ui.base.BaseBindingRecyclerViewAdapter
 import com.sedo.imageslider.ui.base.BaseViewHolder
 
 class IndicatorRecyclerAdapter(
-    context: Context
-) : BaseBindingRecyclerViewAdapter<Boolean>(context) {
+    context: Context,
+    private val selectedColor:Int,
+    private val unSelectedColor:Int
+) : BaseBindingRecyclerViewAdapter<Indicator>(context) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return ViewHolder(
@@ -28,13 +31,14 @@ class IndicatorRecyclerAdapter(
     }
 
     inner class ViewHolder(private val binding: RowIndecatorBinding) :
-        BaseViewHolder<Boolean>(binding.root) {
+        BaseViewHolder<Indicator>(binding.root) {
 
-        override fun bind(item: Boolean) {
-            if (item) {
-                binding.imgDotImage.setCardBackgroundColor(context.resources.getColor(R.color.default_selected))
+        override fun bind(item: Indicator) {
+            binding.data = item
+            if (item.selected) {
+                binding.imgDotImage.setCardBackgroundColor(context.resources.getColor(selectedColor))
             } else {
-                binding.imgDotImage.setCardBackgroundColor(context.resources.getColor(R.color.default_unselected))
+                binding.imgDotImage.setCardBackgroundColor(context.resources.getColor(unSelectedColor))
             }
         }
     }
